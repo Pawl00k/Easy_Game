@@ -76,7 +76,7 @@ class Player(pygame.sprite.Sprite):
         return image_copy
 
     def attack_animation(self):
-        if not self.animate:
+        if not self.animate and not self.hitted:
             if self.attack_animation_shutdown < 1:
                 self.attack_animation_shutdown += 0.2
                 self.now_image = self.attack_image
