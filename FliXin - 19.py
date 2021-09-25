@@ -419,6 +419,34 @@ class GettingPlayerName:
         display.blit(input_rendered, (self.x-width/2, self.y-100-height/2))
 
 
+class MainMenu:
+    def __init__(self):
+        self.font = pygame.font.SysFont('acmefont', 90)
+        self.txt_play = 'Play'
+        self.txt_leaderboard = 'Leaderboard'
+        self.txt_exit_to_desktop = 'Exit to desktop'
+        self.white = (255, 255, 255)
+        self.blue = (24, 255, 213)
+        self.play_rendered = self.font.render(self.txt_play, True, self.white)
+        self.play_rect = self.play_rendered.get_rect()
+
+    def main(self):
+        global disWidth, disHeight, display
+        self.update()
+        play_x = disWidth/2
+        play_y = disHeight/2
+        play_x, play_y = play_x-self.play_rendered.get_width()/2, play_y-self.play_rendered.get_height()/2
+        self.play_rect = self.play_rendered.get_rect(x=play_x, y=play_y)
+        display.blit(self.play_rendered, (play_x, play_y))
+
+    def update(self):
+        mouse_pos = pygame.mouse.get_pos()
+        if self.play_rect.collidepoint(mouse_pos):
+            self.play_rendered = self.font.render(self.txt_play, True, self.blue)
+        else:
+            self.play_rendered = self.font.render(self.txt_play, True, self.white)
+
+
 # Functions
 
 
@@ -510,6 +538,8 @@ def print_highscore():
 
 
 # Main loop
+game_for_loop = False
+number = 1
 while True:
 
     # Other
@@ -520,6 +550,7 @@ while True:
     asteroid_group = pygame.sprite.Group()
     manager = ManageAsteroids()
     player_name = GettingPlayerName()
+    main_menu = MainMenu()
     playerBulletsGroup = pygame.sprite.Group()
     playerGroup = pygame.sprite.Group()
     playerGroup.add(player)
@@ -539,8 +570,7 @@ while True:
     hs_player = line[1]
     getting_player_name = False
     end_menu = False
-    game_for_loop = True
-    while game_for_loop:
+    while game_for_loop and number == 0:
         if not is_ultimate:
             display.fill((0, 0, 0))
         elif is_ultimate and timer_for_ultimate <= 10:
@@ -593,7 +623,14 @@ while True:
                         if game_menu.pl_ag_real_x <= m_x <= game_menu.pl_ag_real_x+game_menu.width_pl_ag and game_menu.pl_ag_real_y <= m_y <= game_menu.pl_ag_real_y+game_menu.height_pl_ag:
                             menu_sound.play()
                             time.sleep(0.08)
+                            game_for_loop = True
+                            number = 1
+                            break
+                        if game_menu.main_menu_real_x <= m_x <= game_menu.main_menu_real_x+game_menu.width_ex_main_menu and game_menu.main_menu_real_y <= m_y <= game_menu.main_menu_real_y+game_menu.height_ex_main_menu:
+                            menu_sound.play()
+                            time.sleep(0.08)
                             game_for_loop = False
+                            number = 1
                             break
             if not open_game_menu and player not in playerGroup and timer_for_game_menu >= 420 and not getting_player_name:
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -607,7 +644,14 @@ while True:
                         if game_menu.pl_ag_real_x <= m_x <= game_menu.pl_ag_real_x+game_menu.width_pl_ag and game_menu.pl_ag_real_y <= m_y <= game_menu.pl_ag_real_y+game_menu.height_pl_ag:
                             menu_sound.play()
                             time.sleep(0.08)
+                            game_for_loop = True
+                            number = 1
+                            break
+                        if game_menu.main_menu_real_x <= m_x <= game_menu.main_menu_real_x+game_menu.width_ex_main_menu and game_menu.main_menu_real_y <= m_y <= game_menu.main_menu_real_y+game_menu.height_ex_main_menu:
+                            menu_sound.play()
+                            time.sleep(0.08)
                             game_for_loop = False
+                            number = 1
                             break
             if not open_game_menu and player not in playerGroup and timer_for_game_menu >= 420 and getting_player_name and not end_menu:
                 if event.type == pygame.KEYDOWN:
@@ -680,3 +724,22 @@ while True:
         # Updating display
         pygame.display.update()
         clock.tick(60)
+    while not game_for_loop and number == 1:
+        display.fill((0, 0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_position = pygame.mouse.get_pos()
+                if main_menu.play_rect.collidepoint(mouse_position):
+                    game_for_loop = True
+                    number = 0
+                    menu_sound.play()
+                    time.sleep(0.08)
+                    break
+        main_menu.main()
+        clock.tick(60)
+        pygame.display.update()
+    if game_for_loop and number == 1:
+        number = 0
