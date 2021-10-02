@@ -1,11 +1,11 @@
 # Importing required libraries
-import os
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'hide'
-import pygame
 import sys
 import math
 import random
 import time
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'hide'
+import pygame
 
 # PyGame initialization
 pygame.init()
@@ -420,40 +420,156 @@ class GettingPlayerName:
 
 
 class MainMenu:
+    is_leaderboard = False
+    is_creators = False
+
     def __init__(self):
         self.font = pygame.font.SysFont('acmefont', 90)
         self.txt_play = 'Play'
         self.txt_leaderboard = 'Leaderboard'
         self.txt_exit_to_desktop = 'Exit to desktop'
+        self.txt_creators = 'Creators'
         self.white = (255, 255, 255)
         self.blue = (24, 255, 213)
         self.play_rendered = self.font.render(self.txt_play, True, self.white)
+        self.exit_to_desktop_rendered = self.font.render(self.txt_exit_to_desktop, True, self.white)
+        self.leaderboard_rendered = self.font.render(self.txt_leaderboard, True, self.white)
+        self.creators_rendered = self.font.render(self.txt_creators, True, self.white)
+        self.exit_rect = self.exit_to_desktop_rendered.get_rect()
         self.play_rect = self.play_rendered.get_rect()
+        self.leaderboard_rect = self.leaderboard_rendered.get_rect()
+        self.creators_rect = self.creators_rendered.get_rect()
+        self.hs_rect = None
+        self.pl_rect = None
+        self.ex_rect = None
+        self.ex2_rect = None
 
     def main(self):
         global disWidth, disHeight, display
         self.update()
         play_x = disWidth/2
-        play_y = disHeight/2
+        play_y = disHeight/2-50
         play_x, play_y = play_x-self.play_rendered.get_width()/2, play_y-self.play_rendered.get_height()/2
+        exit_x = disWidth/2
+        exit_y = disHeight/2+250
+        exit_x, exit_y = exit_x-self.exit_to_desktop_rendered.get_width()/2, exit_y-self.exit_to_desktop_rendered.get_height()/2
+        lead_x = disWidth/2
+        lead_y = disHeight/2+50
+        lead_x, lead_y = lead_x-self.leaderboard_rendered.get_width()/2, lead_y-self.leaderboard_rendered.get_height()/2
+        crea_x = disWidth/2
+        crea_y = disHeight/2+150
+        crea_x, crea_y = crea_x-self.creators_rendered.get_width()/2, crea_y-self.creators_rendered.get_height()/2
         self.play_rect = self.play_rendered.get_rect(x=play_x, y=play_y)
+        self.exit_rect = self.exit_to_desktop_rendered.get_rect(x=exit_x, y=exit_y)
+        self.leaderboard_rect = self.leaderboard_rendered.get_rect(x=lead_x, y=lead_y)
+        self.creators_rect = self.creators_rendered.get_rect(x=crea_x, y=crea_y)
         display.blit(self.play_rendered, (play_x, play_y))
+        display.blit(self.exit_to_desktop_rendered, (exit_x, exit_y))
+        display.blit(self.leaderboard_rendered, (lead_x, lead_y))
+        display.blit(self.creators_rendered, (crea_x, crea_y))
 
     def update(self):
+        global highscore, hs_player
         mouse_pos = pygame.mouse.get_pos()
+        self.print_leaderboard(highscore, hs_player)
+        self.print_creators()
         if self.play_rect.collidepoint(mouse_pos):
             self.play_rendered = self.font.render(self.txt_play, True, self.blue)
         else:
             self.play_rendered = self.font.render(self.txt_play, True, self.white)
+        if self.exit_rect.collidepoint(mouse_pos):
+            self.exit_to_desktop_rendered = self.font.render(self.txt_exit_to_desktop, True, self.blue)
+        else:
+            self.exit_to_desktop_rendered = self.font.render(self.txt_exit_to_desktop, True, self.white)
+        if self.leaderboard_rect.collidepoint(mouse_pos):
+            self.leaderboard_rendered = self.font.render(self.txt_leaderboard, True, self.blue)
+        else:
+            self.leaderboard_rendered = self.font.render(self.txt_leaderboard, True, self.white)
+        if self.creators_rect.collidepoint(mouse_pos):
+            self.creators_rendered = self.font.render(self.txt_creators, True, self.blue)
+        else:
+            self.creators_rendered = self.font.render(self.txt_creators, True, self.white)
+
+    def print_leaderboard(self, hs, hsplayer):
+        if MainMenu.is_leaderboard and not MainMenu.is_creators:
+            global disWidth, disHeight, display
+            display.fill((0, 0, 0))
+            font = pygame.font.SysFont('agencyfb', 90)
+            ex_font = pygame.font.SysFont('acmefont', 60)
+            text_hs = 'Highscore: {}'.format(str(hs))
+            text_player = 'Player: {}'.format(str(hsplayer))
+            text_exit = 'Exit'
+            highscore_rendered = font.render(text_hs, True, self.white)
+            player_rendered = font.render(text_player, True, self.white)
+            ex_rendered = ex_font.render(text_exit, True, self.white)
+            hs_x = disWidth/2
+            hs_y = disHeight/2-200
+            hs_x, hs_y = hs_x-highscore_rendered.get_width()/2, hs_y-highscore_rendered.get_height()/2
+            pl_x = disWidth/2
+            pl_y = disHeight/2-100
+            pl_x, pl_y = pl_x-player_rendered.get_width()/2, pl_y-player_rendered.get_height()/2
+            ex_x = 300
+            ex_y = 950
+            self.hs_rect = highscore_rendered.get_rect(x=hs_x, y=hs_y)
+            self.pl_rect = player_rendered.get_rect(x=pl_x, y=pl_y)
+            self.ex_rect = ex_rendered.get_rect(x=ex_x, y=ex_y)
+            if self.ex_rect.collidepoint(pygame.mouse.get_pos()):
+                ex_rendered = ex_font.render(text_exit, True, self.blue)
+            else:
+                ex_rendered = ex_font.render(text_exit, True, self.white)
+            self.ex_rect = ex_rendered.get_rect(x=ex_x, y=ex_y)
+            display.blit(highscore_rendered, (hs_x, hs_y))
+            display.blit(player_rendered, (pl_x, pl_y))
+            display.blit(ex_rendered, (ex_x, ex_y))
+
+    def print_creators(self):
+        if MainMenu.is_creators and not MainMenu.is_leaderboard:
+            global disWidth, disHeight, display, vec, main_menu
+            display.fill((0, 0, 0))
+            font = pygame.font.SysFont('agencyfb', 80)
+            ex_font = pygame.font.SysFont('acmefont', 60)
+            text_progra = 'Programmed by Paul, aka. Pawl00k'
+            text_sound1 = 'Sounds from OpenGameArt.org'
+            text_sound2 = 'Made by Little Robot Sound Factory'
+            text_graphi = 'Graphics made by Paul, aka. Pawl00k'
+            text_githu1 = 'See this game on my GitHub'
+            text_githu2 = 'github.com/Pawl00k/Easy_Game'
+            txt_exit = 'Exit'
+            ex_rendered = ex_font.render(txt_exit, True, self.white)
+            progra_rendered = font.render(text_progra, True, self.white)
+            sound1_rendered = font.render(text_sound1, True, self.white)
+            sound2_rendered = font.render(text_sound2, True, self.white)
+            graphi_rendered = font.render(text_graphi, True, self.white)
+            githu1_rendered = font.render(text_githu1, True, self.white)
+            githu2_rendered = font.render(text_githu2, True, self.white)
+            progra_pos = vec(5, 5)
+            sound1_pos = vec(disWidth/2+70, 5)
+            sound2_pos = vec(sound1_pos.x, sound1_pos.y+90)
+            graphi_pos = vec(10, 400)
+            githu1_pos = vec(disWidth/2+70, 705)
+            githu2_pos = vec(githu1_pos.x, githu1_pos.y+90)
+            ex_pos = vec(10, disHeight-50)
+            self.ex2_rect = ex_rendered.get_rect(x=ex_pos.x, y=ex_pos.y)
+            if self.ex2_rect.collidepoint(pygame.mouse.get_pos()):
+                ex_rendered = ex_font.render(txt_exit, True, self.blue)
+            else:
+                ex_rendered = ex_font.render(txt_exit, True, self.white)
+            display.blit(progra_rendered, progra_pos)
+            display.blit(sound1_rendered, sound1_pos)
+            display.blit(sound2_rendered, sound2_pos)
+            display.blit(graphi_rendered, graphi_pos)
+            display.blit(githu1_rendered, githu1_pos)
+            display.blit(githu2_rendered, githu2_pos)
+            display.blit(ex_rendered, ex_pos)
 
 
 # Functions
 
 
-def print_number(number):
+def print_number(num):
     global display, disWidth
     font = pygame.font.SysFont('agencyfb', 62)
-    number_rendered = font.render(str(number), True, (255, 255, 255))
+    number_rendered = font.render(str(num), True, (255, 255, 255))
     y = 0
     x = disWidth/2
     width = number_rendered.get_width()
@@ -730,7 +846,7 @@ while True:
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and not MainMenu.is_leaderboard and not MainMenu.is_creators:
                 mouse_position = pygame.mouse.get_pos()
                 if main_menu.play_rect.collidepoint(mouse_position):
                     game_for_loop = True
@@ -738,7 +854,37 @@ while True:
                     menu_sound.play()
                     time.sleep(0.08)
                     break
-        main_menu.main()
+                if main_menu.exit_rect.collidepoint(mouse_position):
+                    menu_sound.play()
+                    time.sleep(0.08)
+                    pygame.quit()
+                    sys.exit()
+                if main_menu.creators_rect.collidepoint(mouse_position):
+                    menu_sound.play()
+                    time.sleep(0.08)
+                    MainMenu.is_creators = True
+                    continue
+                if main_menu.leaderboard_rect.collidepoint(mouse_position):
+                    menu_sound.play()
+                    time.sleep(0.08)
+                    MainMenu.is_leaderboard = True
+                    continue
+            if event.type == pygame.MOUSEBUTTONDOWN and MainMenu.is_leaderboard and not MainMenu.is_creators:
+                mouse_position = pygame.mouse.get_pos()
+                if main_menu.ex_rect.collidepoint(mouse_position):
+                    menu_sound.play()
+                    time.sleep(0.08)
+                    MainMenu.is_leaderboard = False
+            if event.type == pygame.MOUSEBUTTONDOWN and MainMenu.is_creators and not MainMenu.is_leaderboard:
+                if main_menu.ex2_rect.collidepoint(pygame.mouse.get_pos()):
+                    menu_sound.play()
+                    time.sleep(0.08)
+                    MainMenu.is_creators = False
+        mouse_position = pygame.mouse.get_pos()
+        if not MainMenu.is_leaderboard and not MainMenu.is_creators:
+            main_menu.main()
+        else:
+            main_menu.update()
         clock.tick(60)
         pygame.display.update()
     if game_for_loop and number == 1:
