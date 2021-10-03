@@ -508,8 +508,8 @@ class MainMenu:
             pl_x = disWidth/2
             pl_y = disHeight/2-100
             pl_x, pl_y = pl_x-player_rendered.get_width()/2, pl_y-player_rendered.get_height()/2
-            ex_x = 300
-            ex_y = 950
+            ex_x = 10
+            ex_y = disHeight - 50
             self.hs_rect = highscore_rendered.get_rect(x=hs_x, y=hs_y)
             self.pl_rect = player_rendered.get_rect(x=pl_x, y=pl_y)
             self.ex_rect = ex_rendered.get_rect(x=ex_x, y=ex_y)
@@ -841,6 +841,11 @@ while True:
         pygame.display.update()
         clock.tick(60)
     while not game_for_loop and number == 1:
+        with open('highscore.txt', 'r') as file:
+            line = file.read()
+        line = line.split(',')
+        highscore = line[0]
+        hs_player = line[1]
         display.fill((0, 0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
