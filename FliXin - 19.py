@@ -120,7 +120,7 @@ class Cursor:
 
 
 class PlayerBullet(pygame.sprite.Sprite):
-    speed = 15
+    speed = 18
 
     def __init__(self, x, y, mousex, mousey):
         super().__init__()
@@ -429,6 +429,8 @@ class MainMenu:
         self.txt_leaderboard = 'Leaderboard'
         self.txt_exit_to_desktop = 'Exit to desktop'
         self.txt_creators = 'Creators'
+        self.forcer_icon = pygame.image.load('Images\\ForceR_icon.png')
+        self.left_background = pygame.image.load('Images\\Left_background.png')
         self.white = (255, 255, 255)
         self.blue = (24, 255, 213)
         self.play_rendered = self.font.render(self.txt_play, True, self.white)
@@ -471,6 +473,11 @@ class MainMenu:
     def update(self):
         global highscore, hs_player
         mouse_pos = pygame.mouse.get_pos()
+        self.forcer_icon = pygame.transform.scale(self.forcer_icon, (1094, 1094))
+        forcer_x, forcer_y = disWidth / 2, disHeight / 2
+        forcer_x, forcer_y = forcer_x - self.forcer_icon.get_width() / 2, forcer_y - self.forcer_icon.get_height() / 2
+        display.blit(self.forcer_icon, (forcer_x, forcer_y))
+        display.blit(self.left_background, (0, 0))
         self.print_leaderboard(highscore, hs_player)
         self.print_creators()
         if self.play_rect.collidepoint(mouse_pos):
@@ -494,6 +501,10 @@ class MainMenu:
         if MainMenu.is_leaderboard and not MainMenu.is_creators:
             global disWidth, disHeight, display
             display.fill((0, 0, 0))
+            forcer_x, forcer_y = disWidth / 2, disHeight / 2
+            forcer_x, forcer_y = forcer_x - self.forcer_icon.get_width() / 2, forcer_y - self.forcer_icon.get_height() / 2
+            display.blit(self.forcer_icon, (forcer_x, forcer_y))
+            display.blit(self.left_background, (0, 0))
             font = pygame.font.SysFont('agencyfb', 90)
             ex_font = pygame.font.SysFont('acmefont', 60)
             text_hs = 'Highscore: {}'.format(str(hs))
@@ -526,6 +537,10 @@ class MainMenu:
         if MainMenu.is_creators and not MainMenu.is_leaderboard:
             global disWidth, disHeight, display, vec, main_menu
             display.fill((0, 0, 0))
+            forcer_x, forcer_y = disWidth / 2, disHeight / 2
+            forcer_x, forcer_y = forcer_x - self.forcer_icon.get_width() / 2, forcer_y - self.forcer_icon.get_height() / 2
+            display.blit(self.forcer_icon, (forcer_x, forcer_y))
+            display.blit(self.left_background, (0, 0))
             font = pygame.font.SysFont('agencyfb', 80)
             ex_font = pygame.font.SysFont('acmefont', 60)
             text_progra = 'Programmed by Paul, aka. Pawl00k'
