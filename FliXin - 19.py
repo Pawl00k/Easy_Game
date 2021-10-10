@@ -289,7 +289,7 @@ class ManageAsteroids:
         self.wave_asteroids = statistics.wave * 2
 
     def main(self):
-        global statistics, asteroid_group, timer, speed, playerBulletsGroup
+        global statistics, asteroid_group, timer, speed, playerBulletsGroup, specialCirclesGroup
         if timer >= 180:
             if 0 <= self.wave_asteroids:
                 t = Asteroid(player.pos.x, player.pos.y, speed)
@@ -300,6 +300,10 @@ class ManageAsteroids:
                 statistics.wave += 1
                 self.wave_asteroids = statistics.wave + 2
                 timer = 0
+                additives.count = statistics.wave - 5
+                if additives.count >= 4:
+                    additives.count = 4
+                specialCirclesGroup.empty()
                 if statistics.wave >= 10:
                     speed += 0.01
 
@@ -431,6 +435,7 @@ class MainMenu:
         self.txt_creators = 'Creators'
         self.forcer_icon = pygame.image.load('Images\\ForceR_icon.png')
         self.left_background = pygame.image.load('Images\\Left_background.png')
+        self.right_background = pygame.image.load('Images\\Right_background.png')
         self.white = (255, 255, 255)
         self.blue = (24, 255, 213)
         self.play_rendered = self.font.render(self.txt_play, True, self.white)
@@ -478,6 +483,7 @@ class MainMenu:
         forcer_x, forcer_y = forcer_x - self.forcer_icon.get_width() / 2, forcer_y - self.forcer_icon.get_height() / 2
         display.blit(self.forcer_icon, (forcer_x, forcer_y))
         display.blit(self.left_background, (0, 0))
+        display.blit(self.right_background, (1507, 0))
         self.print_leaderboard(highscore, hs_player)
         self.print_creators()
         if self.play_rect.collidepoint(mouse_pos):
@@ -505,6 +511,7 @@ class MainMenu:
             forcer_x, forcer_y = forcer_x - self.forcer_icon.get_width() / 2, forcer_y - self.forcer_icon.get_height() / 2
             display.blit(self.forcer_icon, (forcer_x, forcer_y))
             display.blit(self.left_background, (0, 0))
+            display.blit(self.right_background, (1507, 0))
             font = pygame.font.SysFont('agencyfb', 90)
             ex_font = pygame.font.SysFont('acmefont', 60)
             text_hs = 'Highscore: {}'.format(str(hs))
@@ -541,6 +548,7 @@ class MainMenu:
             forcer_x, forcer_y = forcer_x - self.forcer_icon.get_width() / 2, forcer_y - self.forcer_icon.get_height() / 2
             display.blit(self.forcer_icon, (forcer_x, forcer_y))
             display.blit(self.left_background, (0, 0))
+            display.blit(self.right_background, (1507, 0))
             font = pygame.font.SysFont('agencyfb', 80)
             ex_font = pygame.font.SysFont('acmefont', 60)
             text_progra = 'Programmed by Paul, aka. Pawl00k'
@@ -576,6 +584,72 @@ class MainMenu:
             display.blit(githu1_rendered, githu1_pos)
             display.blit(githu2_rendered, githu2_pos)
             display.blit(ex_rendered, ex_pos)
+
+
+class additives(pygame.sprite.Sprite):
+    count = 0
+    abilities = ['m10', 'm5', 'm30', 'm100', 'h1', 'u']
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load('Images\\Magic_circle.png')
+        self.image_hit = pygame.image.load('Images\\Magic_circle_hit.png')
+        self.rect = self.image.get_rect()
+        self.existing = False
+        additives.count -= 1
+        self.ability = random.choice(additives.abilities)
+        self.sound = pygame.mixer.Sound('Images\\Circle_picking_up.wav')
+        self.x = 0
+        self.y = 0
+
+    def main(self):
+        global disWidth, disHeight, display, specialCirclesGroup
+        probability = random.randint(0, 100)
+        if probability >= 80  and not self.existing and additives.count >= 0:
+            self.x = random.randint(5, disWidth-5)
+            self.y = random.randint(5, disHeight-5)
+            self.rect.center = (self.x, self.y)
+            display.blit(self.image, (self.x, self.y))
+            specialCirclesGroup.add(self)
+            self.existing = True
+        self.check()
+        if self.existing:
+            display.blit(self.image, (self.x, self.y))
+
+    def check(self):
+        global playerGroup
+        if self.existing:
+            hits = pygame.sprite.spritecollide(self, playerGroup, False)
+            if hits:
+                display.blit(self.image_hit, (self.x, self.y))
+                self.sound.play()
+                self.use_ability()
+                self.kill()
+                self.existing = False
+
+    def use_ability(self):
+        global statistics, ultimate_power
+        if self.ability == 'm10':
+            if statistics.mana + 10 >= 100:
+                statistics.mana = 100
+            else:
+                statistics.mana += 10
+        if self.ability == 'm5':
+            if statistics.mana + 5 >= 100:
+                statistics.mana = 100
+            else:
+                statistics.mana += 5
+        if self.ability == 'm30':
+            if statistics.mana + 30 >= 100:
+                statistics.mana = 100
+            else:
+                statistics.mana += 30
+        if self.ability == 'm100':
+            statistics.mana = 100
+        if self.ability == 'h1':
+            statistics.health += 1
+        if self.ability == 'u':
+            ultimate_power()
+
 
 
 # Functions
@@ -685,6 +759,8 @@ while True:
     playerBulletsGroup = pygame.sprite.Group()
     playerGroup = pygame.sprite.Group()
     playerGroup.add(player)
+    specialCirclesGroup = pygame.sprite.Group()
+    specialCirclesGroup.add(additives())
     player_shoot_sound = pygame.mixer.Sound('Images\\Player_Shoot.wav')
     menu_sound = pygame.mixer.Sound('Images\\Menu_Sound.wav')
     timer = 0
@@ -846,6 +922,11 @@ while True:
                     a.main()
                 for b in playerBulletsGroup:
                     b.main()
+                for s in specialCirclesGroup:
+                    s.main()
+                if additives.count >= 1:
+                    specialCirclesGroup.add(additives())
+                # elif additives.count
                 statistics.render()
         cursor.main()
         if open_game_menu and player in playerGroup:
